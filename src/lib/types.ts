@@ -145,33 +145,29 @@ export interface PolicyDto {
 }
 
 export interface SyncEmployeesResult {
-  totalFetched?: number;
-  employeesCreated?: number;
-  employeesUpdated?: number;
-  employeesDeactivated?: number;
-  syncedAt?: string;
-  message?: string;
+  totalFetched: number;
+  employeesCreated: number;
+  employeesUpdated: number;
+  employeesDeactivated: number;
+  syncedAt: string;
 }
 
 export interface EvaluateDailyAttendanceResult {
-  evaluationDate?: string;
-  totalActiveEmployees?: number;
-  presentCount?: number;
-  leaveCount?: number;
-  wfhCount?: number;
-  exceptionCount?: number;
-  absentCount?: number;
-  weekendOrHolidayCount?: number;
-  evaluatedAt?: string;
-  recordsEvaluated?: number;
-  message?: string;
+  evaluationDate: string;
+  totalActiveEmployees: number;
+  presentCount: number;
+  leaveCount: number;
+  wfhCount: number;
+  exceptionCount: number;
+  absentCount: number;
+  weekendOrHolidayCount: number;
+  evaluatedAt: string;
 }
 
 export interface EvaluateDateRangeResult {
-  startDate?: string;
-  endDate?: string;
-  totalDaysEvaluated?: number;
-  dailyResults?: EvaluateDailyAttendanceResult[];
-  completedAt?: string;
-  message?: string;
+  startDate: string;
+  endDate: string;
+  totalDaysEvaluated: number;
+  dailyResults: EvaluateDailyAttendanceResult[];
+  completedAt: string;
 }

@@ -35,18 +35,13 @@ export function AdminSyncCards({ onAddLog }: AdminSyncCardsProps) {
     try {
       const res = await syncEmployees();
       const duration = ((performance.now() - start) / 1000).toFixed(2);
-      const msg = res.message
-        ? res.message
-        : res.totalFetched !== undefined
-        ? `Successfully synchronized ${res.totalFetched} employee records from CG-1 Azure API.`
-        : 'Successfully synchronized employee profiles from CG-1 Azure API.';
 
       onAddLog({
         id: Math.random().toString(),
         timestamp: new Date().toLocaleTimeString(),
         action: 'EMPLOYEE_ROSTER_SYNC',
         status: 'SUCCESS',
-        message: msg,
+        message: `Successfully synchronized ${res.totalFetched} employee records from CG-1 Master Directory (${res.employeesCreated} created, ${res.employeesUpdated} updated).`,
         details: `Duration: ${duration}s | HTTP 200 OK`,
       });
     } catch (err: unknown) {
@@ -71,19 +66,14 @@ export function AdminSyncCards({ onAddLog }: AdminSyncCardsProps) {
     try {
       const res = await evaluateDailyAttendance(dailyDate);
       const duration = ((performance.now() - start) / 1000).toFixed(2);
-      const msg = res.message
-        ? res.message
-        : res.presentCount !== undefined
-        ? `Attendance evaluated for ${dailyDate}: ${res.presentCount} present, ${res.absentCount ?? 0} absent, ${res.leaveCount ?? 0} leave.`
-        : `Evaluated attendance for date ${dailyDate}.`;
 
       onAddLog({
         id: Math.random().toString(),
         timestamp: new Date().toLocaleTimeString(),
         action: 'DAILY_ATTENDANCE_EVAL',
         status: 'SUCCESS',
-        message: msg,
-        details: `Duration: ${duration}s | Active: ${res.totalActiveEmployees ?? res.recordsEvaluated ?? 0}`,
+        message: `Evaluated ${res.totalActiveEmployees} employees for date ${res.evaluationDate}: ${res.presentCount} Present, ${res.absentCount} Absent, ${res.leaveCount} Leave, ${res.wfhCount} WFH, ${res.exceptionCount} Exceptions.`,
+        details: `Duration: ${duration}s | Active: ${res.totalActiveEmployees}`,
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to evaluate daily attendance.';
@@ -107,19 +97,14 @@ export function AdminSyncCards({ onAddLog }: AdminSyncCardsProps) {
     try {
       const res = await evaluateDateRange(rangeFrom, rangeTo);
       const duration = ((performance.now() - start) / 1000).toFixed(2);
-      const msg = res.message
-        ? res.message
-        : res.totalDaysEvaluated !== undefined
-        ? `Attendance evaluation completed for range ${rangeFrom} to ${rangeTo} (${res.totalDaysEvaluated} days evaluated).`
-        : `Attendance evaluation completed for ${rangeFrom} to ${rangeTo}.`;
 
       onAddLog({
         id: Math.random().toString(),
         timestamp: new Date().toLocaleTimeString(),
         action: 'RANGE_ATTENDANCE_EVAL',
         status: 'SUCCESS',
-        message: msg,
-        details: `Duration: ${duration}s | Total Days: ${res.totalDaysEvaluated ?? 0}`,
+        message: `Attendance evaluation successfully completed across ${res.totalDaysEvaluated} days (from ${res.startDate} to ${res.endDate}).`,
+        details: `Duration: ${duration}s | Total Days: ${res.totalDaysEvaluated}`,
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to evaluate date range.';
