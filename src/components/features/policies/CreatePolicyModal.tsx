@@ -15,6 +15,7 @@ interface EditableRule {
 }
 
 const DEFAULT_RULES: EditableRule[] = [
+  { category: 'Probation', normalWfoDays: 5, onBenchDays: 5 },
   { category: 'SDE', normalWfoDays: 5, onBenchDays: 5 },
   { category: 'Consultant 1', normalWfoDays: 5, onBenchDays: 5 },
   { category: 'Consultant 2', normalWfoDays: 5, onBenchDays: 5 },

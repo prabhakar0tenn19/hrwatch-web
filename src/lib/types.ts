@@ -53,6 +53,8 @@ export interface EmployeeDto {
   isDeployed: boolean;
   isActive: boolean;
   location: string;
+  isOnProbation?: boolean;
+  dateOfJoining?: string | null;
   presentDays: number;
   absentDays: number;
   leaveDays: number;
@@ -79,6 +81,8 @@ export interface EmployeeDetailDto {
   isDeployed: boolean;
   isActive: boolean;
   location: string;
+  isOnProbation?: boolean;
+  dateOfJoining?: string | null;
   createdAt: string;
   presentDays: number;
   absentDays: number;

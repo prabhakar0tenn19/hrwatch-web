@@ -72,6 +72,7 @@ export function PolicyRulesTable({ policy, onOpenCreate }: PolicyRulesTableProps
       return items;
     } catch {
       return [
+        { role: 'Probation', requiredDays: 5, model: 'Full Week In-Office' },
         { role: 'SDE', requiredDays: 5, model: 'Full Week In-Office' },
         { role: 'Consultant 1 & 2', requiredDays: 5, model: 'Full Week In-Office' },
         { role: 'Associate 1 & 2', requiredDays: 3, model: 'Hybrid (3-Day Office)' },
