@@ -12,7 +12,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { AlertCircle, AlertTriangle } from 'lucide-react';
 
 export default function ExceptionsPage() {
-  const [exceptions, setExceptions] = useState<EmployeeExceptionDto[]>([]);
+  const [allExceptions, setAllExceptions] = useState<EmployeeExceptionDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,32 +28,39 @@ export default function ExceptionsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await getExceptions(undefined, activeOnly);
-      setExceptions(res);
+      // Fetch all history so KPI cards (Active, Total, Revoked) reflect overall system stats
+      const res = await getExceptions(undefined, false);
+      setAllExceptions(res);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to fetch attendance exceptions.';
       setError(msg);
     } finally {
       setLoading(false);
     }
-  }, [activeOnly]);
+  }, []);
 
   useEffect(() => {
     fetchExceptionsList();
   }, [fetchExceptionsList]);
 
-  // Filter Logic
+  // Filter Logic for Table Display
   const filteredExceptions = useMemo(() => {
-    if (!searchTerm) return exceptions;
-    const term = searchTerm.toLowerCase();
-    return exceptions.filter(
-      (ex) =>
-        ex.fullName.toLowerCase().includes(term) ||
-        ex.employeeCode.toLowerCase().includes(term) ||
-        ex.email.toLowerCase().includes(term) ||
-        ex.reason.toLowerCase().includes(term)
-    );
-  }, [exceptions, searchTerm]);
+    let list = allExceptions;
+    if (activeOnly) {
+      list = list.filter((ex) => ex.isActive);
+    }
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      list = list.filter(
+        (ex) =>
+          ex.fullName.toLowerCase().includes(term) ||
+          ex.employeeCode.toLowerCase().includes(term) ||
+          ex.email.toLowerCase().includes(term) ||
+          ex.reason.toLowerCase().includes(term)
+      );
+    }
+    return list;
+  }, [allExceptions, activeOnly, searchTerm]);
 
   // Handle Revoke Exception
   const handleRevoke = async (id: string, employeeName: string) => {
@@ -77,7 +84,7 @@ export default function ExceptionsPage() {
   return (
     <div className="space-y-6">
       {/* 1. Header & Quick Summary Strip */}
-      <ExceptionsHeader exceptions={exceptions} onOpenCreate={() => setIsCreateOpen(true)} />
+      <ExceptionsHeader exceptions={allExceptions} onOpenCreate={() => setIsCreateOpen(true)} />
 
       {/* 2. Filters Bar */}
       <ExceptionsFilters

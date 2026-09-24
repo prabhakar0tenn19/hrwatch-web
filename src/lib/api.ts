@@ -13,11 +13,23 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5101/api';
 
+function getAuthHeader(): Record<string, string> {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('hrwatch_token');
+    if (token) {
+      return { Authorization: `Bearer ${token}` };
+    }
+  }
+  return {};
+}
+
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
+  const authHeaders = getAuthHeader();
   const res = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...authHeaders,
       ...options?.headers,
     },
     cache: 'no-store',
@@ -36,6 +48,21 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   }
 
   return res.json();
+}
+
+export interface AuthResponseDto {
+  userId: string;
+  username: string;
+  email: string;
+  role: string;
+  token: string;
+}
+
+export async function login(usernameOrEmail: string, password: string): Promise<AuthResponseDto> {
+  return fetchJson<AuthResponseDto>(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    body: JSON.stringify({ usernameOrEmail, password }),
+  });
 }
 
 // 1. Violations Dashboard APIs
