@@ -8,7 +8,8 @@ import { CalendarHeader } from '@/components/features/calendar/CalendarHeader';
 import { CalendarGrid } from '@/components/features/calendar/CalendarGrid';
 import { ActiveExceptionsPanel } from '@/components/features/calendar/ActiveExceptionsPanel';
 import { AddExceptionModal } from '@/components/features/calendar/AddExceptionModal';
-import { AlertTriangle, Calendar as CalendarIcon } from 'lucide-react';
+import { MobileEmployeePickerDrawer } from '@/components/features/calendar/MobileEmployeePickerDrawer';
+import { AlertTriangle, Calendar as CalendarIcon, Users, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function AttendanceCalendarPage() {
   // Default to August 2026 or current active month
@@ -20,6 +21,10 @@ export default function AttendanceCalendarPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Mobile Drawer & Bottom List Collapsible State
+  const [isMobilePickerOpen, setIsMobilePickerOpen] = useState(false);
+  const [isMobileListExpanded, setIsMobileListExpanded] = useState(false);
 
   // Exception Modal State
   const [isAddExceptionOpen, setIsAddExceptionOpen] = useState(false);
@@ -52,6 +57,14 @@ export default function AttendanceCalendarPage() {
     setEndDate(newEnd);
   };
 
+  const handleSelectEmployee = (emp: EmployeeCalendarDto) => {
+    setSelectedEmployeeId(emp.employeeId);
+    // Smooth scroll to top on mobile so the employee's calendar is immediately visible
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const filteredEmployees = useMemo(() => {
     if (!searchTerm) return employees;
     const term = searchTerm.toLowerCase();
@@ -69,13 +82,24 @@ export default function AttendanceCalendarPage() {
   }, [employees, selectedEmployeeId]);
 
   return (
-    <div className="space-y-5">
-      {/* Top Page Title */}
-      <div className="flex items-center gap-2.5">
-        <CalendarIcon className="w-5 h-5 text-amber-500 shrink-0" />
-        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
-          Attendance Calendar
-        </h1>
+    <div className="space-y-4 sm:space-y-5">
+      {/* Top Page Title & Quick Mobile Switch Bar */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <CalendarIcon className="w-5 h-5 text-amber-500 shrink-0" />
+          <h1 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
+            Attendance Calendar
+          </h1>
+        </div>
+
+        {/* Mobile Quick Action Pill */}
+        <button
+          onClick={() => setIsMobilePickerOpen(true)}
+          className="lg:hidden inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 rounded-xl transition-all shadow-2xs"
+        >
+          <Users className="w-3.5 h-3.5 text-amber-600" />
+          <span>Select Employee</span>
+        </button>
       </div>
 
       {error && (
@@ -85,22 +109,25 @@ export default function AttendanceCalendarPage() {
         </div>
       )}
 
-      {/* Main 2-Column Split: Left (Employee Directory) & Right (Calendar + Exceptions) */}
+      {/* Main Layout: 
+          On Desktop: Left 4 Cols (Directory Sidebar) + Right 8 Cols (Calendar Stack)
+          On Mobile: Calendar Stack is AT THE TOP, Directory is accessible via Mobile Drawer and Bottom Collapsible!
+      */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* Left 4 Cols: Employee Directory Sidebar */}
-        <div className="lg:col-span-4 sticky top-20">
+        {/* Desktop Left 4 Cols: Employee Directory Sidebar */}
+        <div className="hidden lg:block lg:col-span-4 sticky top-20">
           <EmployeePickerList
             employees={filteredEmployees}
             selectedEmployeeId={selectedEmployeeId}
-            onSelectEmployee={(emp) => setSelectedEmployeeId(emp.employeeId)}
+            onSelectEmployee={handleSelectEmployee}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             loading={loading && employees.length === 0}
           />
         </div>
 
-        {/* Right 8 Cols: Unified Vertical Stack (Calendar Header -> Grid -> Exceptions) */}
-        <div className="lg:col-span-8 space-y-4">
+        {/* Right 8 Cols on Desktop / Top on Mobile: Calendar Header -> Grid -> Exceptions */}
+        <div className="lg:col-span-8 space-y-4 w-full">
           {/* Header Controls & Profile Card */}
           <CalendarHeader
             selectedEmployee={selectedEmployee}
@@ -110,9 +137,10 @@ export default function AttendanceCalendarPage() {
             onOpenAddException={() => setIsAddExceptionOpen(true)}
             onRefresh={fetchCalendar}
             loading={loading}
+            onOpenEmployeePicker={() => setIsMobilePickerOpen(true)}
           />
 
-          {/* Strict 7-Column Calendar Grid */}
+          {/* Strict 7-Column Calendar Grid + Mobile Agenda Toggle */}
           <CalendarGrid days={selectedEmployee?.days || []} loading={loading} />
 
           {/* Active Exceptions Panel Immediately Below */}
@@ -120,8 +148,57 @@ export default function AttendanceCalendarPage() {
             exceptions={selectedEmployee?.activeExceptions || []}
             onOpenAddException={() => setIsAddExceptionOpen(true)}
           />
+
+          {/* Mobile Bottom Collapsible: Quick Directory Search & Switch */}
+          <div className="lg:hidden mt-6 bg-white border border-slate-200/80 rounded-xl shadow-xs overflow-hidden">
+            <button
+              onClick={() => setIsMobileListExpanded((prev) => !prev)}
+              className="w-full px-4 py-3.5 flex items-center justify-between text-left text-xs font-semibold text-slate-800 bg-slate-50/75 hover:bg-slate-100/75 transition-colors border-b border-slate-100"
+            >
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-amber-500" />
+                <span>All Employees Directory ({employees.length})</span>
+              </div>
+              <div className="flex items-center gap-1 text-slate-400">
+                <span className="text-[11px] font-normal">{isMobileListExpanded ? 'Hide' : 'Show list'}</span>
+                {isMobileListExpanded ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </div>
+            </button>
+
+            {isMobileListExpanded && (
+              <div className="p-3">
+                <EmployeePickerList
+                  employees={filteredEmployees}
+                  selectedEmployeeId={selectedEmployeeId}
+                  onSelectEmployee={(emp) => {
+                    handleSelectEmployee(emp);
+                    setIsMobileListExpanded(false);
+                  }}
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  loading={loading && employees.length === 0}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Mobile Employee Picker Drawer (Bottom Sheet) */}
+      <MobileEmployeePickerDrawer
+        isOpen={isMobilePickerOpen}
+        onClose={() => setIsMobilePickerOpen(false)}
+        employees={filteredEmployees}
+        selectedEmployeeId={selectedEmployeeId}
+        onSelectEmployee={handleSelectEmployee}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        loading={loading && employees.length === 0}
+      />
 
       {/* Add Exception Modal */}
       {selectedEmployee && (

@@ -10,10 +10,17 @@ interface PolicyRuleItem {
 
 interface PolicyRulesTableProps {
   policy: PolicyDto | null;
+  policies?: PolicyDto[];
+  onSelectPolicy?: (policy: PolicyDto) => void;
   onOpenCreate: () => void;
 }
 
-export function PolicyRulesTable({ policy, onOpenCreate }: PolicyRulesTableProps) {
+export function PolicyRulesTable({
+  policy,
+  policies = [],
+  onSelectPolicy,
+  onOpenCreate,
+}: PolicyRulesTableProps) {
   const rules = useMemo<PolicyRuleItem[]>(() => {
     if (!policy?.rulesJson) return [];
     try {
@@ -94,12 +101,12 @@ export function PolicyRulesTable({ policy, onOpenCreate }: PolicyRulesTableProps
   return (
     <div className="space-y-4">
       {/* Policy Overview Card */}
-      <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs shadow-slate-900/5 p-5">
+      <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs shadow-slate-900/5 p-4 sm:p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
+          <div className="min-w-0 flex-1">
             {/* Title + Version + Active Pill in 1 Straight Row */}
-            <div className="flex items-center gap-2.5">
-              <h2 className="text-lg font-semibold text-slate-900 leading-tight">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base sm:text-lg font-semibold text-slate-900 leading-tight">
                 {policy.policyName}
               </h2>
               <span className="px-2 py-0.5 text-xs font-semibold font-mono bg-slate-100 text-slate-700 rounded-md">
@@ -119,7 +126,7 @@ export function PolicyRulesTable({ policy, onOpenCreate }: PolicyRulesTableProps
             </div>
 
             {/* Single Line Clean Metadata */}
-            <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2 mt-2">
+            <div className="text-xs text-slate-500 flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2">
               <span>
                 Effective:{' '}
                 <strong className="text-slate-700 font-medium">
@@ -130,7 +137,7 @@ export function PolicyRulesTable({ policy, onOpenCreate }: PolicyRulesTableProps
                   {policy.effectiveTo ? policy.effectiveTo.slice(0, 10) : 'Present (Ongoing)'}
                 </strong>
               </span>
-              <span>&bull;</span>
+              <span className="hidden sm:inline">&bull;</span>
               <span>
                 Author: <strong className="text-slate-700 font-medium">{policy.createdBy || 'HR Admin'}</strong>
               </span>
@@ -139,27 +146,66 @@ export function PolicyRulesTable({ policy, onOpenCreate }: PolicyRulesTableProps
 
           <button
             onClick={onOpenCreate}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-all shadow-xs shadow-amber-900/10 focus:ring-2 focus:ring-amber-200 shrink-0 self-start sm:self-center"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-all shadow-xs shadow-amber-900/10 focus:ring-2 focus:ring-amber-200 shrink-0 self-stretch sm:self-center"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Create New Version</span>
           </button>
         </div>
+
+        {/* Mobile Fast Version Switcher Dropdown */}
+        {policies.length > 1 && onSelectPolicy && (
+          <div className="lg:hidden mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-slate-600">Switch Version:</span>
+            <select
+              value={policy.id}
+              onChange={(e) => {
+                const found = policies.find((p) => p.id === e.target.value);
+                if (found) onSelectPolicy(found);
+              }}
+              className="text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-amber-200 outline-none max-w-[220px] truncate"
+            >
+              {policies.map((p) => (
+                <option key={p.id} value={p.id}>
+                  v{p.version} - {p.policyName} {p.isActive ? '(Active)' : '(Archived)'}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
-      {/* Simplified Rules Table */}
+      {/* Rules Breakdown Container */}
       <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs shadow-slate-900/5 overflow-hidden">
-        <div className="px-5 py-3 bg-slate-50/75 border-b border-slate-200/80 flex items-center justify-between">
+        <div className="px-4 sm:px-5 py-3 bg-slate-50/75 border-b border-slate-200/80 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-slate-500" />
             <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">
-              WFO Attendance Requirements by Role
+              WFO Requirements by Role
             </h3>
           </div>
-          <span className="text-xs text-slate-400 font-medium">{rules.length} Configured Rules</span>
+          <span className="text-xs text-slate-400 font-medium">{rules.length} Rules</span>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* MOBILE VIEW (< 640px): Responsive Card List (Zero horizontal scrolling!) */}
+        <div className="sm:hidden divide-y divide-slate-100">
+          {rules.map((r, idx) => (
+            <div key={idx} className="p-3.5 flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-semibold text-slate-900 truncate">{r.role}</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">{r.model}</div>
+              </div>
+              <div className="shrink-0 text-right">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/80">
+                  {r.requiredDays} Days / Wk
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* DESKTOP VIEW (>= 640px): Full Table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left text-xs min-w-[500px]">
             <thead className="bg-slate-50/50 text-slate-500 text-[11px] uppercase font-semibold border-b border-slate-200/80">
               <tr>
@@ -171,19 +217,14 @@ export function PolicyRulesTable({ policy, onOpenCreate }: PolicyRulesTableProps
             <tbody className="divide-y divide-slate-100">
               {rules.map((r, idx) => (
                 <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
-                  {/* Role / Designation */}
                   <td className="py-3 px-5 font-semibold text-slate-900 align-middle">
                     {r.role}
                   </td>
-
-                  {/* Required WFO Days */}
                   <td className="py-3 px-5 text-center align-middle">
                     <span className="font-semibold text-slate-800 tabular-nums">
                       {r.requiredDays} Days / Week
                     </span>
                   </td>
-
-                  {/* Attendance Model */}
                   <td className="py-3 px-5 text-right align-middle">
                     <span className="text-slate-500 font-medium">
                       {r.model}

@@ -17,7 +17,7 @@ export function PolicyVersionsSidebar({
   loading,
 }: PolicyVersionsSidebarProps) {
   return (
-    <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs shadow-slate-900/5 p-4 flex flex-col h-[600px]">
+    <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs shadow-slate-900/5 p-4 flex flex-col lg:h-[600px] h-auto max-h-[420px]">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
         <div className="flex items-center gap-2">

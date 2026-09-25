@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { EmployeeExceptionDto } from '@/lib/types';
 import { Avatar } from '@/components/common/Avatar';
-import { Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trash2, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 
 interface ExceptionsTableProps {
   exceptions: EmployeeExceptionDto[];
@@ -36,7 +36,83 @@ export function ExceptionsTable({ exceptions, onRevoke, revokingId }: Exceptions
 
   return (
     <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs shadow-slate-900/5 overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* 1. MOBILE CARDS VIEW (< 640px) */}
+      <div className="sm:hidden divide-y divide-slate-100">
+        {paginatedList.map((ex) => {
+          const daysCount = calculateDays(ex.fromDate, ex.toDate);
+          const isRevoking = revokingId === ex.id;
+
+          return (
+            <div key={ex.id} className="p-4 space-y-3 bg-white">
+              {/* Card Header: Avatar + Name + Employee Code + Status Pill */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <Avatar name={ex.fullName} size="md" className="w-9 h-9 text-xs shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-sm text-slate-900 truncate">{ex.fullName}</div>
+                    <div className="text-[11px] text-slate-400 font-mono truncate mt-0.5">
+                      {ex.employeeCode} &bull; {ex.email}
+                    </div>
+                  </div>
+                </div>
+
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold shrink-0 ${
+                    ex.isActive
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-slate-100 text-slate-500 border border-slate-200'
+                  }`}
+                >
+                  {ex.isActive ? 'Active' : 'Revoked'}
+                </span>
+              </div>
+
+              {/* Card Details: Date Range & Duration */}
+              <div className="flex items-center justify-between text-xs bg-slate-50 border border-slate-100/80 rounded-lg p-2.5">
+                <div className="flex items-center gap-1.5 text-slate-700">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="font-medium">
+                    {formatDate(ex.fromDate)} &rarr; {formatDate(ex.toDate)}
+                  </span>
+                </div>
+                <span className="font-semibold text-slate-800 text-[11px] bg-white px-2 py-0.5 rounded border border-slate-200 shrink-0">
+                  {daysCount} {daysCount === 1 ? 'Day' : 'Days'}
+                </span>
+              </div>
+
+              {/* Reason / Justification Callout */}
+              <div className="text-xs bg-purple-50/40 border border-purple-100/60 rounded-lg p-2.5">
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-purple-700 mb-0.5">
+                  Reason / Justification
+                </div>
+                <p className="text-slate-700 leading-relaxed font-normal">{ex.reason}</p>
+              </div>
+
+              {/* Metadata & Actions */}
+              <div className="flex items-center justify-between pt-1">
+                <div className="text-[11px] text-slate-400">
+                  <span>Approved by </span>
+                  <strong className="text-slate-600 font-medium">{ex.createdBy || 'HR Admin'}</strong>
+                </div>
+
+                {ex.isActive && (
+                  <button
+                    onClick={() => onRevoke(ex.id, ex.fullName)}
+                    disabled={isRevoking}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{isRevoking ? 'Revoking...' : 'Revoke'}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 2. DESKTOP TABLE VIEW (>= 640px) */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left text-xs min-w-[680px]">
           <thead className="bg-slate-50/75 text-slate-500 text-[11px] uppercase font-semibold border-b border-slate-200/80">
             <tr>
@@ -77,14 +153,14 @@ export function ExceptionsTable({ exceptions, onRevoke, revokingId }: Exceptions
                     </div>
                   </td>
 
-                  {/* Duration (Clean Plain Text / Number without Background Pill) */}
+                  {/* Duration */}
                   <td className="py-3 px-4 align-middle text-center">
                     <span className="font-semibold text-slate-700 text-xs tabular-nums">
                       {daysCount} {daysCount === 1 ? 'Day' : 'Days'}
                     </span>
                   </td>
 
-                  {/* Reason (Truncated with max-w-[200px]) */}
+                  {/* Reason */}
                   <td className="py-3 px-4 align-middle">
                     <div
                       className="text-xs text-slate-700 leading-snug max-w-[200px] truncate"
@@ -113,7 +189,7 @@ export function ExceptionsTable({ exceptions, onRevoke, revokingId }: Exceptions
                     </span>
                   </td>
 
-                  {/* Action (Subtle Grey Revoke Button, Rose on Hover) */}
+                  {/* Action */}
                   <td className="py-3 px-4 align-middle text-right">
                     {ex.isActive ? (
                       <button
@@ -136,8 +212,8 @@ export function ExceptionsTable({ exceptions, onRevoke, revokingId }: Exceptions
       </div>
 
       {/* Pagination Controls */}
-      <div className="px-5 py-3 bg-slate-50/75 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-        <div>
+      <div className="px-4 sm:px-5 py-3 bg-slate-50/75 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <div className="text-center sm:text-left">
           Showing <span className="font-semibold text-slate-800">{startIndex + 1}</span> to{' '}
           <span className="font-semibold text-slate-800">
             {Math.min(startIndex + pageSize, exceptions.length)}
@@ -149,19 +225,21 @@ export function ExceptionsTable({ exceptions, onRevoke, revokingId }: Exceptions
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs"
+            className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs"
+            aria-label="Previous page"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          <span className="px-3 py-1 font-semibold text-slate-700 bg-white border border-slate-200 rounded shadow-2xs">
+          <span className="px-3 py-1 font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg shadow-2xs">
             Page {currentPage} of {totalPages}
           </span>
 
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs"
+            className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs"
+            aria-label="Next page"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
