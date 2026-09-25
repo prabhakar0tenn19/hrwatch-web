@@ -54,8 +54,11 @@ export function MobileEmployeePickerDrawer({
         aria-hidden="true"
       />
 
-      {/* Drawer Container (Slides up from bottom, max-h-[85vh]) */}
-      <div className="relative z-10 bg-white rounded-t-2xl shadow-2xl flex flex-col max-h-[88vh] w-full overflow-hidden animate-in slide-in-from-bottom duration-200">
+      {/* Drawer Container (Fixed consistent height so it NEVER shrinks or jumps when searching) */}
+      <div
+        className="relative z-10 bg-white rounded-t-2xl shadow-2xl flex flex-col h-[85vh] max-h-[90vh] w-full overflow-hidden animate-in slide-in-from-bottom duration-200"
+        style={{ height: '85dvh' }}
+      >
         {/* Drag handle bar */}
         <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-2.5 mb-1 shrink-0" />
 
@@ -101,7 +104,7 @@ export function MobileEmployeePickerDrawer({
         </div>
 
         {/* Scrollable Employee List */}
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 overscroll-contain">
+        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 overscroll-contain pb-8">
           {loading ? (
             <div className="p-10 text-center text-sm text-slate-400 animate-pulse">
               Loading employee roster...
