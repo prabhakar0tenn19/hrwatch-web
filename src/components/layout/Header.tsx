@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Logo } from '../common/Logo';
-import { LogOut } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 
 interface StoredUser {
   username?: string;
@@ -11,7 +11,11 @@ interface StoredUser {
   role?: string;
 }
 
-export function Header() {
+interface HeaderProps {
+  onToggleMobileMenu?: () => void;
+}
+
+export function Header({ onToggleMobileMenu }: HeaderProps) {
   const router = useRouter();
   const [user, setUser] = useState<StoredUser | null>(null);
 
@@ -37,9 +41,19 @@ export function Header() {
   const initials = displayName.slice(0, 2).toUpperCase();
 
   return (
-    <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
-      {/* Left: Brand Logo */}
-      <div className="flex items-center">
+    <header className="h-16 border-b border-slate-200 bg-white px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+      {/* Left: Mobile Menu Toggle & Brand Logo */}
+      <div className="flex items-center gap-3">
+        {onToggleMobileMenu && (
+          <button
+            type="button"
+            onClick={onToggleMobileMenu}
+            className="md:hidden p-2 -ml-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+            aria-label="Open navigation menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
         <Logo />
       </div>
 

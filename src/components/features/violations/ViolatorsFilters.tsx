@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 interface ViolatorsFiltersProps {
   searchTerm: string;
@@ -19,7 +19,7 @@ export function ViolatorsFilters({
   onWeeksCountChange,
 }: ViolatorsFiltersProps) {
   return (
-    <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs flex flex-col sm:flex-row gap-3 items-center justify-between">
+    <div className="p-3 sm:p-4 bg-white border border-slate-200 rounded-xl shadow-xs flex flex-col sm:flex-row gap-2.5 sm:gap-3 items-stretch sm:items-center justify-between">
       {/* Search Input */}
       <div className="relative w-full sm:w-80">
         <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -33,26 +33,23 @@ export function ViolatorsFilters({
       </div>
 
       {/* Filter Dropdowns */}
-      <div className="flex items-center gap-2.5 w-full sm:w-auto">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Filter className="w-3.5 h-3.5 text-slate-400" />
-          <select
-            value={selectedDesignation}
-            onChange={(e) => onDesignationChange(e.target.value)}
-            className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-400 cursor-pointer"
-          >
-            <option value="ALL">All Designations</option>
-            <option value="SDE">Software Engineer (SDE)</option>
-            <option value="Consultant">Consultant</option>
-            <option value="Associate">Associate</option>
-            <option value="Manager">Manager</option>
-          </select>
-        </div>
+      <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+        <select
+          value={selectedDesignation}
+          onChange={(e) => onDesignationChange(e.target.value)}
+          className="w-full sm:w-auto text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-400 cursor-pointer"
+        >
+          <option value="ALL">All Designations</option>
+          <option value="SDE">Software Engineer (SDE)</option>
+          <option value="Consultant">Consultant</option>
+          <option value="Associate">Associate</option>
+          <option value="Manager">Manager</option>
+        </select>
 
         <select
           value={weeksCount}
           onChange={(e) => onWeeksCountChange(Number(e.target.value))}
-          className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-400 cursor-pointer"
+          className="w-full sm:w-auto text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-400 cursor-pointer"
         >
           <option value={2}>Past 2 Weeks</option>
           <option value={4}>Past 4 Weeks</option>

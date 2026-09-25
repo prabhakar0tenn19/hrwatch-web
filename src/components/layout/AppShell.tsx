@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
@@ -8,6 +8,7 @@ import { Sidebar } from './Sidebar';
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     // Client-side auth guard
@@ -15,6 +16,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (!token && pathname !== '/login') {
       router.push('/login');
     }
+    // Close mobile menu on route change
+    setIsMobileMenuOpen(false);
   }, [pathname, router]);
 
   // Avoid flash during SSR
@@ -25,14 +28,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <>
-      <Header />
-      <div className="flex min-h-[calc(100vh-4rem)]">
-        <Sidebar />
-        <main className="flex-1 px-8 py-6 max-w-[1240px] 2xl:max-w-[1360px] mx-auto w-full">
+    <div className="min-h-screen bg-[#FAF8F5]/40 flex flex-col">
+      <Header onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
+      <div className="flex flex-1">
+        <Sidebar
+          isMobileOpen={isMobileMenuOpen}
+          onCloseMobile={() => setIsMobileMenuOpen(false)}
+        />
+        <main className="flex-1 px-3.5 py-4 sm:px-6 sm:py-6 lg:px-8 max-w-[1240px] 2xl:max-w-[1360px] mx-auto w-full min-w-0">
           {children}
         </main>
       </div>
-    </>
+    </div>
   );
 }

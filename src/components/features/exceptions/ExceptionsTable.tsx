@@ -37,7 +37,7 @@ export function ExceptionsTable({ exceptions, onRevoke, revokingId }: Exceptions
   return (
     <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs shadow-slate-900/5 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
+        <table className="w-full text-left text-xs min-w-[680px]">
           <thead className="bg-slate-50/75 text-slate-500 text-[11px] uppercase font-semibold border-b border-slate-200/80">
             <tr>
               <th className="py-3 px-4 text-left">Employee</th>

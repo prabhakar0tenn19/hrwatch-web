@@ -24,18 +24,20 @@ export function TopShortfallWidget({ topEmployees, weeksCount }: TopShortfallWid
       <div className="mt-3 divide-y divide-slate-100">
         {topEmployees && topEmployees.length > 0 ? (
           topEmployees.map((emp, index) => (
-            <div key={emp.employeeId} className="py-2.5 flex items-center justify-between first:pt-1 last:pb-1">
-              <div className="flex items-center gap-2.5">
-                <span className="text-xs font-semibold text-slate-400 w-3">{index + 1}.</span>
-                <Avatar name={emp.fullName} size="sm" className="w-7 h-7 text-[11px]" />
-                <div>
-                  <div className="font-semibold text-slate-900 text-xs leading-tight">{emp.fullName}</div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">{emp.designation}</div>
+            <div key={emp.employeeId} className="py-2.5 flex items-center justify-between gap-2 first:pt-1 last:pb-1">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-xs font-semibold text-slate-400 w-3 shrink-0">{index + 1}.</span>
+                <Avatar name={emp.fullName} size="sm" className="w-7 h-7 text-[11px] shrink-0" />
+                <div className="min-w-0">
+                  <div className="font-semibold text-slate-900 text-xs leading-tight truncate max-w-[130px] xs:max-w-[180px] sm:max-w-none">
+                    {emp.fullName}
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5 truncate">{emp.designation}</div>
                 </div>
               </div>
 
-              <div className="text-right">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+              <div className="text-right shrink-0">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
                   {emp.totalShortfallDays}d shortfall
                 </span>
                 <div className="text-[10px] text-slate-400 mt-0.5 font-mono">
